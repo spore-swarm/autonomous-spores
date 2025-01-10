@@ -2,6 +2,7 @@ import asyncio
 import sys
 import threading
 
+from spores.client_direct.template import MESSAGE_HANDLER_TEMPLATE
 from spores.core.client import Client
 from fastapi import FastAPI
 from loguru import logger
@@ -13,6 +14,9 @@ from loguru import logger
 from pydantic import BaseModel, Field
 from uuid import UUID, uuid4
 from typing import Optional
+
+from spores.core.context import compose_context
+from spores.core.parsing import MESSAGE_COMPLETION_FOOTER
 
 
 class DirectClient(Client):
@@ -52,6 +56,10 @@ class DirectClient(Client):
         @router.post("/agent/completions")
         def create_completion(request: CompletionRequest):
             runtime = self.agents[request.agent_id]
+            state = runtime.compose_state()
+            context = compose_context(state, MESSAGE_HANDLER_TEMPLATE + MESSAGE_COMPLETION_FOOTER)
+            runtime.agent.update_system_prompt(context)
+
             response = runtime.process_completion(request.prompt)
             print(response)
 
