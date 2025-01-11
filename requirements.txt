@@ -1,4 +1,3 @@
-
 torch>=2.1.1,<3.0
 transformers>=4.39.0,<5.0.0
 asyncio>=3.4.3,<4.0
@@ -143,3 +142,6 @@ chromadb~=0.6.2
 pinecone~=5.4.2
 supabase~=2.11.0
 pydub~=0.25.1
+unique-names-generator~=1.0.2
+swarms_memory~=0.1.2
+swarm-models~=0.3.0

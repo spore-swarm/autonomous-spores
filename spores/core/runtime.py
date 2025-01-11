@@ -36,6 +36,7 @@ class AgentRuntime:
             interactive=False,
             autosave=True,
             long_term_memory=memory,
+            auto_generate_prompt=False,
             dynamic_temperature_enabled=True,
         )
 

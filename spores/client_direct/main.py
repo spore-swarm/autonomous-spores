@@ -1,20 +1,14 @@
-import asyncio
-import sys
-import threading
-
+import uvicorn
+import os
+import json
 from spores.client_direct.template import MESSAGE_HANDLER_TEMPLATE
 from spores.core.client import Client
 from fastapi import FastAPI
-from loguru import logger
 from fastapi.middleware.cors import CORSMiddleware
-import uvicorn
-import os
-from fastapi import (APIRouter, Depends, Request)
+from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel, Field
-from uuid import UUID, uuid4
 from typing import Optional
-
 from spores.core.context import compose_context
 from spores.core.parsing import MESSAGE_COMPLETION_FOOTER
 
@@ -58,15 +52,16 @@ class DirectClient(Client):
             runtime = self.agents[request.agent_id]
             state = runtime.compose_state()
             context = compose_context(state, MESSAGE_HANDLER_TEMPLATE + MESSAGE_COMPLETION_FOOTER)
-            runtime.agent.update_system_prompt(context)
-
+            runtime.agent.short_memory.add(
+                role="system", content=context
+            )
             response = runtime.process_completion(request.prompt)
-            print(response)
+            return json.loads(response)
 
         return router
 
     def start(self):
-        port = os.getenv("SEVER_PORT", 8000)
+        port = os.getenv("SERVER_PORT", 8000)
         logger.info(f"Server running at http://localhost:{port}")
         uvicorn.run(self.app, port=port, log_level="error")
 
