@@ -1,8 +1,5 @@
-import asyncio
-
 from dotenv import load_dotenv
 from spores.client_direct.main import DirectClient
-import sys
 import os
 import json
 from loguru import logger
