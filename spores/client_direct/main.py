@@ -66,7 +66,7 @@ class DirectClient(Client):
         return router
 
     def start(self):
-        port = os.getenv("SEVER_PORT", 8000)
+        port = os.getenv("SERVER_PORT", 8000)
         logger.info(f"Server running at http://localhost:{port}")
         uvicorn.run(self.app, port=port, log_level="error")
 
