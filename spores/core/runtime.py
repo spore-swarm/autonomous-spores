@@ -42,8 +42,8 @@ class AgentRuntime:
 
         self.agent = agent
 
-    def process_completion(self, prompt: str):
-        response = self.agent.run(prompt)
+    def process_message(self, message: str):
+        response = self.agent.run(message)
 
         return response
 

@@ -3,9 +3,8 @@ import os
 import json
 from spores.client_direct.template import MESSAGE_HANDLER_TEMPLATE
 from spores.core.client import Client
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi import APIRouter
 from loguru import logger
 from pydantic import BaseModel, Field
 from typing import Optional
@@ -40,22 +39,49 @@ class DirectClient(Client):
         router = APIRouter()
 
         @router.get("/")
-        def hello():
+        async def hello():
             return "Spores"
 
         @router.get("/agents")
-        def list_agents():
-            print(self.agents)
+        async def list_agents():
+            agents = []
+            for runtime in self.agents.values():
+                agents.append({
+                    "id": runtime.agent.agent_id,
+                    "name": runtime.agent.name
+                })
 
-        @router.post("/agent/completions")
-        def create_completion(request: CompletionRequest):
-            runtime = self.agents[request.agent_id]
+            return {"agents": agents}
+
+        @router.get("/agents/{agent_id}")
+        async def get_agent(agent_id):
+            item = self.agents.get(agent_id)
+            if not item:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Agent {agent_id} not found",
+                )
+
+            return {
+                "id": agent_id,
+                "character": item.character
+            }
+
+        @router.post("/agents/{agent_id}/message")
+        async def create_message(agent_id, request: CompletionRequest):
+            runtime = self.agents.get(agent_id)
+            if not runtime:
+                raise HTTPException(
+                    status_code= status.HTTP_404_NOT_FOUND,
+                    detail=f"Agent {agent_id} not found",
+                )
+
             state = runtime.compose_state()
             context = compose_context(state, MESSAGE_HANDLER_TEMPLATE + MESSAGE_COMPLETION_FOOTER)
             runtime.agent.short_memory.add(
                 role="system", content=context
             )
-            response = runtime.process_completion(request.prompt)
+            response = runtime.process_message(request.message)
             return json.loads(response)
 
         return router
@@ -72,8 +98,7 @@ class DirectClient(Client):
 class CompletionRequest(BaseModel):
     """Model for completion requests."""
 
-    prompt: str = Field(..., description="The prompt to process")
-    agent_id: str = Field(..., description="ID of the agent to use")
+    message: str = Field(..., description="The prompt to process")
     max_tokens: Optional[int] = Field(
         None, description="Maximum tokens to generate"
     )
