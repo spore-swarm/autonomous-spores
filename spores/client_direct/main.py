@@ -78,10 +78,9 @@ class DirectClient(Client):
 
             state = runtime.compose_state()
             context = compose_context(state, MESSAGE_HANDLER_TEMPLATE + MESSAGE_COMPLETION_FOOTER)
-            runtime.agent.short_memory.add(
-                role="system", content=context
-            )
+            runtime.agent.short_memory.update(0, "system", context)
             response = runtime.process_message(request.message)
+
             return json.loads(response)
 
         return router
