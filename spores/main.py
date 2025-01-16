@@ -19,8 +19,10 @@ def start_agents():
 
 def load_characters():
     characters = []
-
-    directory = "../characters"
+    
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    directory = os.path.join(base_dir, "characters")
+    
     for filename in os.listdir(directory):
         if filename.endswith(".json"):
             filepath = os.path.join(directory, filename)

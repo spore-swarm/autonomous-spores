@@ -77,7 +77,7 @@ class DirectClient(Client):
                 )
 
             state = runtime.compose_state()
-            context = compose_context(state, MESSAGE_HANDLER_TEMPLATE + MESSAGE_COMPLETION_FOOTER)
+            context = compose_context(state, MESSAGE_HANDLER_TEMPLATE)
             runtime.agent.short_memory.update(0, "system", context)
             response = runtime.process_message(request.message)
 

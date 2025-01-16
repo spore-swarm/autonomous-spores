@@ -54,6 +54,7 @@ from swarms.utils.wrapper_clusterop import (
     exec_callable_with_clusterops,
 )
 from swarms.telemetry.capture_sys_data import log_agent_data
+from spores.core.utils import is_valid_json
 
 
 # Utils
@@ -796,6 +797,7 @@ class Agent:
             # Clear the short memory
             response = None
             all_responses = []
+            tool_out = {}
 
             # Query the long term memory first for the context
             if self.long_term_memory is not None:
@@ -887,14 +889,14 @@ class Agent:
                                 f"Unexpected response format: {type(response)}"
                             )
 
-                        # Check and execute tools
-                        if self.tools is not None:
-                            self.parse_and_execute_tools(response)
-
                         # Add the response to the memory
                         self.short_memory.add(
                             role=self.agent_name, content=response
                         )
+
+                        # Check and execute tools
+                        if self.tools is not None:
+                            tool_out = self.parse_and_execute_tools(response)
 
                         # Add to all responses
                         all_responses.append(response)
@@ -1039,7 +1041,11 @@ class Agent:
                 self.output_type == "string"
                 or self.output_type == "str"
             ):
-                return concat_strings(all_responses)
+                if (is_valid_json(tool_out)):
+                    return tool_out
+                return json.dumps({
+                    "text": concat_strings(all_responses)
+                })
             elif self.output_type == "list":
                 return all_responses
             elif (
@@ -1230,6 +1236,8 @@ class Agent:
                 role="Tool Executor",
                 content=out,
             )
+
+            return out
 
         except Exception as error:
             logger.error(f"Error executing tool: {error}")
