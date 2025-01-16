@@ -99,8 +99,8 @@ def parse_and_execute_json(
         # Format final results
         if len(results) == 1:
             # Return single result directly
-            data = {"result": next(iter(results.values()))}
-        else:
+            data = {"text": next(iter(results.values()))}
+        elif len(results) > 1:
             # Return all results
             data = {
                 "results": results,
@@ -108,6 +108,8 @@ def parse_and_execute_json(
                     f"{k}: {v}" for k, v in results.items()
                 ),
             }
+        else:
+            data = {}
 
         if return_str:
             return json.dumps(data)
