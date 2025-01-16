@@ -1,13 +1,13 @@
 import uuid
 import random
-
+from importlib import import_module
 from unique_names_generator.data import NAMES
 
 from spores.core.context import add_header
 from swarms.structs.agent import Agent
 from swarms_memory import ChromaDB
 from unique_names_generator import get_random_name
-
+from loguru import logger
 
 class AgentRuntime:
     agent: Agent
@@ -22,6 +22,17 @@ class AgentRuntime:
             output_dir=self.character.get('name', 'agent'),
         )
 
+        tools = []
+        if len(self.character['plugins']) > 0:
+            for plugin in self.character['plugins']:
+                try:
+                    module = import_module(f"spores.{plugin}.main")
+                except ImportError:
+                    logger.error(f"Plugin {plugin} not found")
+                    continue
+                plugin_class = getattr(module, plugin)
+                tools += plugin_class.get("actions")
+
         agent_id = str(
             uuid.uuid3(uuid.UUID("12345678-1234-5678-1234-567812345678"), self.character.get('name', 'agent')))
         agent = Agent(
@@ -32,6 +43,7 @@ class AgentRuntime:
             model_name=self.character['model'],
             max_loops=1,
             dashboard=False,
+            tools=tools,
             output_type="str",
             interactive=False,
             autosave=True,
