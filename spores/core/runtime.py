@@ -4,6 +4,7 @@ from importlib import import_module
 from unique_names_generator.data import NAMES
 
 from spores.core.context import add_header
+from spores.core.prompt import tool_prompt
 from swarms.structs.agent import Agent
 from swarms_memory import ChromaDB
 from unique_names_generator import get_random_name
@@ -50,6 +51,7 @@ class AgentRuntime:
             long_term_memory=memory,
             auto_generate_prompt=False,
             dynamic_temperature_enabled=True,
+            tool_system_prompt=tool_prompt(),
         )
 
         self.agent = agent
