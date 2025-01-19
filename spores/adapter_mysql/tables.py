@@ -1,5 +1,5 @@
 mysql_tables = """
-CREATE TABLE `memories` (
+CREATE TABLE IF NOT EXISTS `memories` (
   `id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
   `user_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '',
   `agent_id` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT '',
