@@ -5,6 +5,7 @@ from spores.adapter_mysql.main import MysqlAdapter
 import os
 import json
 from loguru import logger
+from mysql.connector import pooling
 
 from spores.core.runtime import AgentRuntime
 
@@ -54,20 +55,23 @@ def initialize_database():
     db_adapter = os.getenv("DB_ADAPTER")
     match db_adapter:
         case "mysql":
-            db_host = os.getenv("DB_HOST")
-            db_port = os.getenv("DB_PORT")
-            db_user = os.getenv("DB_USER")
-            db_password = os.getenv("DB_PASSWORD")
-            db_name = os.getenv("DB_NAME")
+            db_config = {
+                "host": os.getenv("DB_HOST"),
+                "user": os.getenv("DB_USER"),
+                "password": os.getenv("DB_PASSWORD"),
+                "database": os.getenv("DB_NAME"),
+            }    
 
-            connection = mysql.connector.connect(
-                host=db_host,
-                port=db_port,
-                user=db_user,
-                password=db_password,
-                database=db_name
-            )
-            db = MysqlAdapter(connection)
+            pool_config = {
+                "pool_name": "mysql_pool",
+                "pool_size": 5,
+                "pool_reset_session": True,
+                **db_config
+            }        
+
+            connection_pool = pooling.MySQLConnectionPool(**pool_config)
+            
+            db = MysqlAdapter(connection_pool)
         case _:
             raise ValueError(f"Invalid database adapter: {db_adapter}")
         
