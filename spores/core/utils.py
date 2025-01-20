@@ -1,4 +1,5 @@
 import json
+import uuid
 
 def is_valid_json(input_string):
     try:
@@ -6,3 +7,6 @@ def is_valid_json(input_string):
         return True
     except ValueError:
         return False
+    
+def string_to_uuid(input_string):
+    return str(uuid.uuid5(uuid.NAMESPACE_DNS, input_string))

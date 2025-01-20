@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS `memories` (
   UNIQUE KEY `idx_id` (`id`),
   KEY `idx_agent` (`agent_id`),
   KEY `idx_user` (`user_id`),
-  KEY `idx_room` (`room_id`)
+  KEY `idx_room` (`room_id`),
+  KEY `idx_createtime` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 """

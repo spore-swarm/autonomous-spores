@@ -9,7 +9,8 @@ from swarms_memory import ChromaDB
 from unique_names_generator import get_random_name
 from loguru import logger
 from spores.core.database import DatabaseAdapter
-
+from spores.core.utils import string_to_uuid
+import json
 class AgentRuntime:
     agent: Agent
     character: None
@@ -36,8 +37,7 @@ class AgentRuntime:
                 plugin_class = getattr(module, plugin)
                 tools += plugin_class.get("actions")
 
-        agent_id = str(
-            uuid.uuid3(uuid.UUID("12345678-1234-5678-1234-567812345678"), self.character.get('name', 'agent')))
+        agent_id = string_to_uuid(self.character.get('name', 'agent'))
         agent = Agent(
             id=agent_id,
             agent_id=agent_id,
@@ -58,9 +58,11 @@ class AgentRuntime:
 
         self.agent = agent
 
-    def process_message(self, message: str):
-        response = self.agent.run(message)
-
+    def process_message(self, user_id:str, room_id:str, message: str):
+        self.db.create_memory(user_id, json.dumps({'text': message}, ensure_ascii=False), self.agent.agent_id, room_id)
+        
+        response = self.agent.run(message, user_id=user_id, room_id=room_id)
+        self.db.create_memory(self.agent.agent_id, response, self.agent.agent_id, room_id)
         return response
 
     def compose_state(self):
