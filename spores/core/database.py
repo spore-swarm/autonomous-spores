@@ -10,6 +10,6 @@ class DatabaseAdapter(ABC):
         pass
 
     @abstractmethod
-    def create_memory(self, user_id:str, content: str, agent_id: str, room_id: str):
+    def create_memory(self, role:str, user_id:str, content: str, agent_id: str, room_id: str):
         pass
     
