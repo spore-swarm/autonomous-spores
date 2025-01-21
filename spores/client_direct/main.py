@@ -10,7 +10,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from spores.core.context import compose_context
 from spores.core.parsing import MESSAGE_COMPLETION_FOOTER
-
+from spores.core.utils import string_to_uuid
 
 class DirectClient(Client):
     def __init__(self):
@@ -76,10 +76,13 @@ class DirectClient(Client):
                     detail=f"Agent {agent_id} not found",
                 )
 
+            room_id = request.room_id or string_to_uuid(f"default-room-{agent_id}")
+            user_id = request.user_id or string_to_uuid('user')
+
             state = runtime.compose_state()
             context = compose_context(state, MESSAGE_HANDLER_TEMPLATE)
             runtime.agent.short_memory.update(0, "system", context)
-            response = runtime.process_message(request.message)
+            response = runtime.process_message(user_id, room_id, request.message)
 
             return json.loads(response)
 
@@ -98,10 +101,5 @@ class CompletionRequest(BaseModel):
     """Model for completion requests."""
 
     message: str = Field(..., description="The prompt to process")
-    max_tokens: Optional[int] = Field(
-        None, description="Maximum tokens to generate"
-    )
-    temperature_override: Optional[float] = 0.5
-    stream: bool = Field(
-        default=False, description="Enable streaming response"
-    )
+    room_id: Optional[str] = None
+    user_id: Optional[str] = None
