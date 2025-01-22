@@ -49,7 +49,6 @@ class AgentRuntime:
             tools=tools,
             output_type="str",
             interactive=False,
-            autosave=True,
             long_term_memory=memory,
             auto_generate_prompt=False,
             dynamic_temperature_enabled=True,

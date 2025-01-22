@@ -119,8 +119,8 @@ def parse_and_execute_json(
     except json.JSONDecodeError as e:
         error = f"Invalid JSON format: {str(e)}"
         logger.error(error)
-        return {"error": error}
+        return {}
     except Exception as e:
         error = f"Error parsing and executing JSON: {str(e)}"
         logger.error(error)
-        return {"error": error}
+        return {}

@@ -75,14 +75,11 @@ class DirectClient(Client):
                     status_code= status.HTTP_404_NOT_FOUND,
                     detail=f"Agent {agent_id} not found",
                 )
-
-            room_id = request.room_id or string_to_uuid(f"default-room-{agent_id}")
-            user_id = request.user_id or string_to_uuid('user')
-
+            
             state = runtime.compose_state()
             context = compose_context(state, MESSAGE_HANDLER_TEMPLATE)
             runtime.agent.short_memory.update(0, "system", context)
-            response = runtime.process_message(user_id, room_id, request.message)
+            response = runtime.process_message(request.user_id, request.room_id, request.message)
 
             return json.loads(response)
 

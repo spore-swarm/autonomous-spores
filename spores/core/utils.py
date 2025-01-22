@@ -5,7 +5,7 @@ def is_valid_json(input_string):
     try:
         json.loads(input_string)
         return True
-    except ValueError:
+    except Exception:
         return False
     
 def string_to_uuid(input_string):
