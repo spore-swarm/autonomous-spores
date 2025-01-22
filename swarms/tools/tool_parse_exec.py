@@ -3,6 +3,7 @@ from typing import List, Any, Callable
 
 from swarms.utils.parse_code import extract_code_from_markdown
 from swarms.utils.loguru_logger import initialize_logger
+from spores.core.utils import remove_json_block
 
 logger = initialize_logger(log_folder="tool_parse_exec")
 
@@ -29,9 +30,11 @@ def parse_and_execute_json(
     if not functions or not json_string:
         raise ValueError("Functions and JSON string are required")
 
+    conversation_text = remove_json_block(json_string)
+
     if parse_md:
         json_string = extract_code_from_markdown(json_string)
-
+        
     try:
         # Create function name to function mapping
         function_dict = {func.__name__: func for func in functions}
@@ -99,7 +102,7 @@ def parse_and_execute_json(
         # Format final results
         if len(results) == 1:
             # Return single result directly
-            data = {"text": next(iter(results.values()))}
+            data = {"text": conversation_text + "\n" + next(iter(results.values()))}
         elif len(results) > 1:
             # Return all results
             data = {

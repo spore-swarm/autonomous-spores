@@ -915,7 +915,7 @@ class Agent:
                         self.db.create_memory(self.agent_name, self.agent_id, response, self.agent_id, room_id)
 
                         # Check and execute tools
-                        if self.tools is not None:
+                        if self.tools:
                             tool_out = self.parse_and_execute_tools(response, room_id)
 
                         # Add to all responses

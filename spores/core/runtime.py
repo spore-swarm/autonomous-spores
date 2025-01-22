@@ -43,7 +43,7 @@ class AgentRuntime:
             agent_id=agent_id,
             agent_name=self.character.get('name', 'agent'),
             system_prompt=self.character.get('system', ''),
-            model_name=self.character['model'],
+            model_name=self.character.get('model', 'gpt-4o'),
             max_loops=1,
             dashboard=False,
             tools=tools,
