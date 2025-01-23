@@ -4,7 +4,7 @@ from importlib import import_module
 from unique_names_generator.data import NAMES
 from spores.core.context import add_header
 from spores.core.prompt import tool_prompt
-from swarms.structs.agent import Agent
+from spores.core.agent import Agent
 from swarms_memory import ChromaDB
 from unique_names_generator import get_random_name
 from loguru import logger
@@ -54,15 +54,13 @@ class AgentRuntime:
             auto_generate_prompt=False,
             dynamic_temperature_enabled=True,
             tool_system_prompt=tool_prompt(),
+            db = self.db
         )
 
         self.agent = agent
 
-    def process_message(self, user_id:str, room_id:str, message: str):
-        self.db.create_memory(user_id, json.dumps({'text': message}, ensure_ascii=False), self.agent.agent_id, room_id)
-        
+    def process_message(self, user_id:str, room_id:str, message: str):        
         response = self.agent.run(message, user_id=user_id, room_id=room_id)
-        self.db.create_memory(self.agent.agent_id, response, self.agent.agent_id, room_id)
         return response
 
     def compose_state(self):
