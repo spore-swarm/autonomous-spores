@@ -56,6 +56,7 @@ from swarms.utils.wrapper_clusterop import (
 from swarms.telemetry.capture_sys_data import log_agent_data
 from spores.core.utils import is_valid_json
 from spores.core.database import DatabaseAdapter
+from spores.core.utils import string_to_uuid
 
 # Utils
 # Custom stopping condition
@@ -786,6 +787,11 @@ class Agent:
             agent(task="What is the capital of France?", img="path/to/image.jpg", is_last=True)
         """
         try:
+            if room_id is None:
+                room_id = string_to_uuid(f"default-room-{self.agent_id}")
+            if user_id is None:
+                user_id = string_to_uuid('user')
+
             self.check_if_no_prompt_then_autogenerate(task)
 
             self.agent_output.task = task
@@ -909,7 +915,7 @@ class Agent:
                         self.db.create_memory(self.agent_name, self.agent_id, response, self.agent_id, room_id)
 
                         # Check and execute tools
-                        if self.tools is not None:
+                        if self.tools:
                             tool_out = self.parse_and_execute_tools(response, room_id)
 
                         # Add to all responses
@@ -1243,6 +1249,9 @@ class Agent:
                 *args,
                 **kwargs,
             )
+            
+            if not out:
+                return out
 
             out = str(out)
 
@@ -1966,6 +1975,11 @@ class Agent:
                     task, *args, **kwargs
                 )
 
+                # Check if memory retrieval is empty (value is '[]\n')
+                if memory_retrieval == '[]\n':
+                    logger.info("No relevant documents found in long term memory")
+                    return None
+                
                 memory_retrieval = (
                     f"Documents Available: {str(memory_retrieval)}"
                 )

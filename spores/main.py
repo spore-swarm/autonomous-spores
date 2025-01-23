@@ -1,5 +1,4 @@
 from dotenv import load_dotenv
-import mysql.connector
 from spores.client_direct.main import DirectClient
 from spores.adapter_mysql.main import MysqlAdapter
 import os
