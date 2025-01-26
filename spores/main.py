@@ -5,7 +5,7 @@ import os
 import json
 from loguru import logger
 from mysql.connector import pooling
-
+from spores.client_twitter.client import TwitterClient
 from spores.core.runtime import AgentRuntime
 
 load_dotenv(override=True)
@@ -39,6 +39,9 @@ def load_characters():
 
 def start_agent(character, direct_client, db):
     runtime = create_agent(character, db)
+
+    initialize_clients(runtime)
+
     direct_client.register_agent(runtime)
 
 def create_agent(character, db):
@@ -75,6 +78,18 @@ def initialize_database():
             raise ValueError(f"Invalid database adapter: {db_adapter}")
         
     return db
+
+def initialize_clients(runtime: AgentRuntime):
+    clients = []
+
+    if len(runtime.character.get('clients', [])) == 0:
+        return clients
+    
+    if  "twitter" in runtime.character['clients']:
+        twitter_client = TwitterClient(runtime)
+        clients.append(twitter_client)
+
+    return clients
 
 if __name__ == "__main__":
     start_agents()
