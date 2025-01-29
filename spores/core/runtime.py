@@ -27,7 +27,7 @@ class AgentRuntime:
         )
 
         tools = []
-        if len(self.character['plugins']) > 0:
+        if len(self.character.get('plugins', [])) > 0:
             for plugin in self.character['plugins']:
                 try:
                     module = import_module(f"spores.{plugin}.main")
