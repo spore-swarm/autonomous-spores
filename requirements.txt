@@ -146,3 +146,4 @@ unique-names-generator~=1.0.2
 swarms_memory~=0.1.2
 swarm-models~=0.3.0
 mysql-connector-python>=8.0.0
+tweepy>=4.14.0
