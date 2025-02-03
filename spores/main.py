@@ -7,10 +7,11 @@ from loguru import logger
 from mysql.connector import pooling
 from spores.client_twitter.client import TwitterClient
 from spores.core.runtime import AgentRuntime
+import asyncio
 
 load_dotenv(override=True)
 
-def start_agents():
+async def start_agents():
     direct_client = DirectClient()
 
     db = initialize_database()
@@ -20,7 +21,7 @@ def start_agents():
     for character in characters:
         start_agent(character, direct_client, db)
 
-    direct_client.start()
+    await direct_client.start()
 
 def load_characters():
     characters = []
@@ -92,5 +93,4 @@ def initialize_clients(runtime: AgentRuntime):
     return clients
 
 if __name__ == "__main__":
-    start_agents()
-
+    asyncio.run(start_agents())
