@@ -1,4 +1,3 @@
-import uvicorn
 import os
 import json
 from spores.client_direct.template import MESSAGE_HANDLER_TEMPLATE
@@ -10,7 +9,7 @@ from pydantic import BaseModel, Field
 from typing import Optional
 from spores.core.context import compose_context
 from spores.core.parsing import MESSAGE_COMPLETION_FOOTER
-from spores.core.utils import string_to_uuid
+from uvicorn import Config, Server
 
 class DirectClient(Client):
     def __init__(self):
@@ -85,10 +84,12 @@ class DirectClient(Client):
 
         return router
 
-    def start(self):
+    async def start(self):
         port = os.getenv("SERVER_PORT", 8000)
         logger.info(f"Server running at http://localhost:{port}")
-        uvicorn.run(self.app, port=port, log_level="error")
+        config = Config(app=self.app, port=port, log_level="error")
+        server = Server(config)
+        await server.serve()
 
     def stop(self):
         logger.warning("Direct client does not support stopping")
