@@ -10,7 +10,7 @@ from unique_names_generator import get_random_name
 from loguru import logger
 from spores.core.database import DatabaseAdapter
 from spores.core.utils import string_to_uuid
-import json
+
 class AgentRuntime:
     agent: Agent
     character: None
@@ -62,15 +62,18 @@ class AgentRuntime:
         response = self.agent.run(message, user_id=user_id, room_id=room_id)
         return response
 
-    def compose_state(self):
-        return {
+    def compose_state(self, additional_keys: dict[str, str] = {}):
+        state = {
             'agent_name': self.character['name'],
             'lore': self.process_lore(),
             'bio': self.process_bio(),
             'topic': self.process_topic(),
             'topics': self.process_topics(),
-            'message_directions': self.process_message_directions()
+            'message_directions': self.process_message_directions(),
+            'post_directions': self.process_post_directions()
         }
+        state.update(additional_keys)
+        return state
 
     def process_lore(self):
         lore = ""

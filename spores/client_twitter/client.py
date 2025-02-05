@@ -1,24 +1,25 @@
 from spores.core.runtime import AgentRuntime
-from spores.core.database import DatabaseAdapter
 from spores.client_twitter.types import Profile, Tweet
 from typing import Dict, Optional, Any
+from spores.client_twitter.data_source import DataSource
+import os
 
 class TwitterClient:
-    def __init__(self, runtime: AgentRuntime):
+    def __init__(self, runtime: AgentRuntime, data_source: DataSource):
         self.runtime= runtime
-
+        self.data_source = data_source
         self.last_checked_tweet_id: str = None
         self.profile: Profile = None
 
         ## todo: user db to store cache
         self.cached_tweets: Dict[str, Tweet] = {}
         self.cache_profile: Profile = None
-        self.cache_latest_checked_tweet_id: str = None
+        self.cached_latest_checked_tweet_id: str = None
 
     async def init(self) -> None:
-        username = self.runtime.get_setting("TWITTER_USER_NAME")
+        username = os.getenv("TWITTER_USER_NAME")
         await self.load_profile(username);
-
+    
     async def cache_tweet(self, tweet: Tweet) -> None:
         self.cached_tweets[tweet.id] = tweet
 
@@ -32,10 +33,10 @@ class TwitterClient:
         return tweet
 
     async def load_latest_checked_tweet_id(self) -> None:
-        return self.cache_latest_checked_tweet_id
+        return self.cached_latest_checked_tweet_id
 
     async def cache_latest_checked_tweet_id(self, tweet_id: str) -> None:
-        self.cache_latest_checked_tweet_id = tweet_id
+        self.cached_latest_checked_tweet_id = tweet_id
 
     async def get_cached_profile(self, username: str) -> Optional[Profile]:
         return self.cache_profile
