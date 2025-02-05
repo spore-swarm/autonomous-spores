@@ -5,9 +5,11 @@ import os
 import json
 from loguru import logger
 from mysql.connector import pooling
-from spores.client_twitter.client import TwitterClient
+from spores.client_twitter.manager import TwitterManager
 from spores.core.runtime import AgentRuntime
 import asyncio
+from spores.client_twitter.data_source_mock import MockDataSource
+
 
 load_dotenv(override=True)
 
@@ -87,7 +89,8 @@ def initialize_clients(runtime: AgentRuntime):
         return clients
     
     if  "twitter" in runtime.character['clients']:
-        twitter_client = TwitterClient(runtime)
+        twitter_client = TwitterManager(runtime, MockDataSource())
+        asyncio.create_task(twitter_client.start())
         clients.append(twitter_client)
 
     return clients
