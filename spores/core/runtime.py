@@ -14,11 +14,12 @@ from spores.core.utils import string_to_uuid
 class AgentRuntime:
     agent: Agent
     character: None
-    db: DatabaseAdapter
+    db_adapter: DatabaseAdapter
 
-    def __init__(self, character, db):
+    def __init__(self, character, db_adapter, cache_manager):
         self.character = character
-        self.db = db
+        self.db_adapter = db_adapter
+        self.cache_manager = cache_manager
 
     def initialize(self):
         memory = ChromaDB(
@@ -53,7 +54,7 @@ class AgentRuntime:
             auto_generate_prompt=False,
             dynamic_temperature_enabled=True,
             tool_system_prompt=tool_prompt(),
-            db = self.db
+            db = self.db_adapter
         )
 
         self.agent = agent
@@ -167,6 +168,6 @@ class AgentRuntime:
         post_styles = self.character['style'].get("post", [])
         if len(all_styles) > 0 or len(post_styles) > 0:
             combined_styles = "\n".join(all_styles + post_styles)
-            return add_header(f"# Post Directions for {self.character.name}", combined_styles)
+            return add_header(f"# Post Directions for {self.character['name']}", combined_styles)
 
         return ""

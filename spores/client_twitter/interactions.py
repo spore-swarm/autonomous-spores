@@ -51,6 +51,8 @@ class InteractionClient:
         try:
             print("Checking Twitter interactions start")
 
+            self.last_checked_tweet_id = await self.client.load_latest_checked_tweet_id()
+            
             # Get blacklisted users
             user_blacklist = []
 

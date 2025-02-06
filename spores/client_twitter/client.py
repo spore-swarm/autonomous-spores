@@ -32,11 +32,11 @@ class TwitterClient:
             tweet = self.data_source.get_tweet(tweet_id)
         return tweet
 
-    async def load_latest_checked_tweet_id(self) -> None:
-        return self.cached_latest_checked_tweet_id
+    async def load_latest_checked_tweet_id(self):
+        return self.runtime.cache_manager.get("latest_checked_tweet_id")
 
     async def cache_latest_checked_tweet_id(self, tweet_id: str) -> None:
-        self.cached_latest_checked_tweet_id = tweet_id
+        self.runtime.cache_manager.set("latest_checked_tweet_id", tweet_id)
 
     async def get_cached_profile(self, username: str) -> Optional[Profile]:
         return self.cache_profile
