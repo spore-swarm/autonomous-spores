@@ -9,6 +9,9 @@ from spores.client_twitter.manager import TwitterManager
 from spores.core.runtime import AgentRuntime
 import asyncio
 from spores.client_twitter.data_source_mock import MockDataSource
+from spores.core.utils import string_to_uuid
+from spores.core.cache import DbCacheAdapter
+from spores.core.cache import CacheManager
 
 
 load_dotenv(override=True)
@@ -16,12 +19,12 @@ load_dotenv(override=True)
 async def start_agents():
     direct_client = DirectClient()
 
-    db = initialize_database()
-    db.init()
+    db_adapter = initialize_database()
+    db_adapter.init()
 
     characters = load_characters()
     for character in characters:
-        start_agent(character, direct_client, db)
+        start_agent(character, direct_client, db_adapter)
 
     await direct_client.start()
 
@@ -40,25 +43,28 @@ def load_characters():
 
     return characters
 
-def start_agent(character, direct_client, db):
-    runtime = create_agent(character, db)
+def start_agent(character, direct_client, db_adapter):
+    runtime = create_agent(character, db_adapter)
 
     initialize_clients(runtime)
 
     direct_client.register_agent(runtime)
 
-def create_agent(character, db):
+def create_agent(character, db_adapter):
     logger.info(f"Creating runtime for character {character['name']}")
-    runtime = AgentRuntime(character, db)
+    
+    cache_adapter = intialize_db_cache(character, db_adapter)
+
+    runtime = AgentRuntime(character, db_adapter, CacheManager(cache_adapter))
     runtime.initialize()
 
     return runtime
 
 def initialize_database():
-    db = None
+    db_adapter = None
 
-    db_adapter = os.getenv("DB_ADAPTER")
-    match db_adapter:
+    db_adapter_str = os.getenv("DB_ADAPTER")
+    match db_adapter_str:
         case "mysql":
             db_config = {
                 "host": os.getenv("DB_HOST"),
@@ -76,11 +82,11 @@ def initialize_database():
 
             connection_pool = pooling.MySQLConnectionPool(**pool_config)
             
-            db = MysqlAdapter(connection_pool)
+            db_adapter = MysqlAdapter(connection_pool)
         case _:
             raise ValueError(f"Invalid database adapter: {db_adapter}")
         
-    return db
+    return db_adapter
 
 def initialize_clients(runtime: AgentRuntime):
     clients = []
@@ -94,6 +100,14 @@ def initialize_clients(runtime: AgentRuntime):
         clients.append(twitter_client)
 
     return clients
+
+def intialize_db_cache(character, db_adapter):
+    agent_id = string_to_uuid(character.get('name', 'agent'))
+
+    db_cache_adapter = DbCacheAdapter(db_adapter, agent_id)
+
+    return db_cache_adapter
+
 
 if __name__ == "__main__":
     asyncio.run(start_agents())
